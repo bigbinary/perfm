@@ -6,9 +6,9 @@ Gem::Specification.new do |spec|
   spec.authors = ["Vishnu M"]
   spec.email = ["vishnu.m@bigbinary.com"]
 
-  spec.summary = "Everything Rails performance monitoring"
-  spec.description = "Monitor Rails application performance metrics"
-  spec.homepage = "https://github.com/vishnu-m/perfm"
+  spec.summary = "Perfm aims to be a performance monitoring tool for Ruby on Rails applications. Currently, it has support for GVL instrumentation and provides analytics to help optimize Puma thread concurrency settings based on the collected GVL data."
+  spec.description = "Perfm aims to be a performance monitoring tool for Ruby on Rails applications."
+  spec.homepage = "https://github.com/bigbinary/perfm"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
 
