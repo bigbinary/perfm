@@ -1,0 +1,22 @@
+class DropPerfmGvlMetrics < ActiveRecord::Migration<%= migration_version %>
+  def up
+    drop_table :perfm_gvl_metrics
+  end
+
+  def down
+    create_table :perfm_gvl_metrics do |t|
+      t.float :gc_ms
+      t.float :run_ms
+      t.float :idle_ms
+      t.float :stall_ms
+      t.float :io_percent
+      t.string :method
+      t.string :controller
+      t.string :action
+
+      t.index [:controller, :action]
+
+      t.timestamps
+    end
+  end
+end 
