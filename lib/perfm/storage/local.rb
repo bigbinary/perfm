@@ -4,7 +4,11 @@ module Perfm
       def store(metrics)
         return if metrics.empty?
 
-        Perfm::GvlMetric.insert_all(metrics)
+        if metrics.first.key?(:job_class)
+          SidekiqGvlMetric.insert_all(metrics)
+        else
+          Perfm::GvlMetric.insert_all(metrics)
+        end
       end
     end
   end
