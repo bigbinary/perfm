@@ -11,6 +11,7 @@ module Perfm
   autoload :Queue, "perfm/queue"
   autoload :Agent, "perfm/agent"
   autoload :GvlMetricsAnalyzer, "perfm/gvl_metrics_analyzer"
+  autoload :SidekiqGvlMetricsAnalyzer, "perfm/sidekiq_gvl_metrics_analyzer"
   
   module Storage
     autoload :Base, "perfm/storage/base"
@@ -20,6 +21,7 @@ module Perfm
 
   module Middleware
     autoload :GvlInstrumentation, "perfm/middleware/gvl_instrumentation"
+    autoload :SidekiqGvlInstrumentation, "perfm/middleware/sidekiq_gvl_instrumentation"
   end
 
   class << self
@@ -41,6 +43,7 @@ module Perfm
       return unless configuration.enabled?
 
       setup_sidekiq if configuration.monitor_sidekiq?
+      setup_sidekiq_gvl if configuration.monitor_gvl?
       
       storage = if configuration.storage == :local
         Storage::Local.new
@@ -60,6 +63,16 @@ module Perfm
     def setup_sidekiq
       return unless defined?(::Sidekiq)
       Metrics::Sidekiq.setup
+    end
+
+    def setup_sidekiq_gvl
+      return unless defined?(::Sidekiq)
+      
+      Sidekiq.configure_server do |config|
+        config.server_middleware do |chain|
+          chain.add Middleware::SidekiqGvlInstrumentation
+        end
+      end
     end
   end
 end

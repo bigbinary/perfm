@@ -1,0 +1,17 @@
+class CreateSidekiqGvlMetrics < ActiveRecord::Migration<%= migration_version %>
+  def change
+    create_table :sidekiq_gvl_metrics do |t|
+      t.float :gc_ms
+      t.float :run_ms
+      t.float :idle_ms
+      t.float :stall_ms
+      t.float :io_percent
+      t.string :job_class
+      t.string :queue
+
+      t.index [:job_class, :queue]
+
+      t.timestamps
+    end
+  end
+end 
