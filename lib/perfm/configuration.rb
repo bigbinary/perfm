@@ -6,6 +6,7 @@ module Perfm
       enabled: true,
       monitor_sidekiq: false,
       monitor_gvl: false,
+      monitor_sidekiq_gvl: false,
       monitor_sidekiq_queues: false,
       storage: :api,
       api_url: nil,
@@ -18,6 +19,10 @@ module Perfm
 
     def monitor_gvl?
       enabled? && monitor_gvl
+    end
+
+    def monitor_sidekiq_gvl?
+      enabled? && monitor_sidekiq_gvl
     end
 
     def enabled?
