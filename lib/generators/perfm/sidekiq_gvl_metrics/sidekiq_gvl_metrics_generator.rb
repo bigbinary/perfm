@@ -9,8 +9,8 @@ module Perfm
     
     def create_migration_file
       migration_template(
-        'create_sidekiq_gvl_metrics.rb.erb',
-        File.join(db_migrate_path, "create_sidekiq_gvl_metrics.rb")
+        'create_perfm_sidekiq_gvl_metrics.rb.erb',
+        File.join(db_migrate_path, "create_perfm_sidekiq_gvl_metrics.rb")
       )
     end
     

@@ -1,6 +1,6 @@
-class CreateSidekiqGvlMetrics < ActiveRecord::Migration<%= migration_version %>
+class CreatePerfmSidekiqGvlMetrics < ActiveRecord::Migration<%= migration_version %>
   def change
-    create_table :sidekiq_gvl_metrics do |t|
+    create_table :perfm_sidekiq_gvl_metrics do |t|
       t.float :gc_ms
       t.float :run_ms
       t.float :idle_ms

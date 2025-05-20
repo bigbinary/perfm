@@ -43,7 +43,6 @@ module Perfm
       return unless configuration.enabled?
 
       setup_sidekiq if configuration.monitor_sidekiq?
-      setup_sidekiq_gvl if configuration.monitor_gvl?
       
       storage = if configuration.storage == :local
         Storage::Local.new
@@ -63,16 +62,6 @@ module Perfm
     def setup_sidekiq
       return unless defined?(::Sidekiq)
       Metrics::Sidekiq.setup
-    end
-
-    def setup_sidekiq_gvl
-      return unless defined?(::Sidekiq)
-      
-      Sidekiq.configure_server do |config|
-        config.server_middleware do |chain|
-          chain.add Middleware::SidekiqGvlInstrumentation
-        end
-      end
     end
   end
 end
