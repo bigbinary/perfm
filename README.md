@@ -1,16 +1,17 @@
-Perfm
-==============
+# Perfm
+
 Perfm aims to be a performance monitoring tool for Ruby on Rails applications. Currently, it has support for GVL instrumentation and provides analytics to help optimize Puma thread concurrency settings based on the collected GVL data.
 
-Requirements
------------------
+## Requirements
+
 - Ruby: MRI 3.2+
 
 This is because the GVL instrumentation API was [added](https://bugs.ruby-lang.org/issues/18339) in 3.2.0. Perfm makes use of the [gvl_timing](https://github.com/jhawthorn/gvl_timing) gem to capture per-thread timings for each GVL state.
 
-Installation
------------------
+## Installation
+
 Add perfm to your Gemfile.
+
 ```ruby
 gem 'perfm'
 ```
@@ -23,8 +24,8 @@ bin/rails generate perfm:install
 
 This will create a migration file with a table to store the GVL metrics. Run the migration and configure the gem as described below.
 
-Configuration
------------------
+## Configuration
+
 Configure Perfm in an initializer:
 
 ```ruby
@@ -83,7 +84,6 @@ The following features are currently in beta and may have limited functionality 
 
 ### Perfm queue latency monitor
 
-
 The queue latency monitor tracks Sidekiq queue times and raises alerts when the queue latency exceed their thresholds. To enable this feature, set `config.monitor_sidekiq_queues = true` in your Perfm configuration.
 
 ruby
@@ -101,9 +101,31 @@ When enabled, Perfm will monitor your Sidekiq queues and raise a `Perfm::Errors:
 
 Perfm expects queues that need latency monitoring to follow this naming pattern:
 
--   `within_X_seconds` (e.g., within_5_seconds)
--   `within_X_minutes` (e.g., within_2_minutes)
--   `within_X_hours` (e.g., within_1_hours)
+- `within_X_seconds` (e.g., within_5_seconds)
+- `within_X_minutes` (e.g., within_2_minutes)
+- `within_X_hours` (e.g., within_1_hours)
+
+### Sidekiq GVL Instrumentation
+
+To enable GVL instrumentation for Sidekiq, first run the generator to add migrations for the required table to store the metrics.
+
+```bash
+bin/rails generate perfm:sidekiq_gvl_metrics
+```
+
+Then enable the `monitor_sidekiq_gvl` configuration in your initializer.
+
+```ruby
+Perfm.configure do |config|
+  config.monitor_sidekiq_gvl = true
+end
+```
+
+When enabled, Perfm will collect GVL metrics at a job level, similar to how it collects metrics for HTTP requests. This can be used to analyze GVL metrics specifically for Sidekiq queues to understand their I/O characteristics.
+
+```ruby
+Perfm::SidekiqGvlMetric.calculate_queue_io_percentage("within_5_seconds")
+```
 
 ### Heap analyzer
 
@@ -145,6 +167,7 @@ end
 #### Controller to generate heap dumps
 
 As we need to invoke rbtrace from the same process, we'll use a controller itself to invoke the `HeapDumper`.
+
 ```ruby
 class Perfm::Admin::HeapDumpsController < ActionController::Base
   skip_forgery_protection
