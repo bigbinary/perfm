@@ -1,7 +1,12 @@
 module Perfm
   module Metrics
     class Sidekiq
+      ERROR_RATE_LIMIT_SECONDS = 30
+
       class << self
+        @last_error_times = {}
+        @error_time_mutex = Mutex.new
+
         def setup
           start_monitoring
         end
@@ -19,22 +24,10 @@ module Perfm
           return unless defined?(::Sidekiq)
 
           ::Sidekiq::Queue.all.each do |queue|
-            record_queue_metrics(queue)
-            
             if monitor_sidekiq_queues? && valid_queue_name?(queue.name)
               check_latency_threshold(queue)
             end
           end
-        end
-
-        def record_queue_metrics(queue)
-          # TODO: Replace this with sending metrics to NewRelic as perfm-ingester work is not complete
-          Perfm.agent.push_metrics({
-            type: "sidekiq_queue",
-            queue: queue.name,
-            latency: queue.latency,
-            size: queue.size,
-          })
         end
 
         def check_latency_threshold(queue)
@@ -46,8 +39,10 @@ module Perfm
         end
 
         def handle_exceeded_latency(queue, expected_latency)
+          return unless should_raise_error_for_queue?(queue.name)
+          update_last_error_time(queue.name)
+
           Thread.new do
-            # TODO: Prevent flooding the error monitoring tool if there are a lot of latency exceeded errors
             raise Errors::LatencyExceededError.new(
               queue: queue.name,
               latency: queue.latency,
@@ -62,6 +57,23 @@ module Perfm
   
         def valid_queue_name?(queue_name)
           QueueLatency.valid_queue_name?(queue_name)
+        end
+
+        private
+
+        def should_raise_error_for_queue?(queue_name)
+          @error_time_mutex.synchronize do
+            last_error_time = @last_error_times[queue_name]
+            return true unless last_error_time
+
+            Time.current - last_error_time >= ERROR_RATE_LIMIT_SECONDS
+          end
+        end
+
+        def update_last_error_time(queue_name)
+          @error_time_mutex.synchronize do
+            @last_error_times[queue_name] = Time.current
+          end
         end
       end
     end
