@@ -66,6 +66,7 @@ This will print the following metrics:
 - `total_io_and_stall_percentage`: Percentage of time spent in I/O operations(idle time) and GVL stalls combined
 - `average_response_time_ms`: Average response time in milliseconds per request
 - `average_stall_ms`: Average GVL stall time in milliseconds per request
+- `average_gc_ms`: Average garbage collection time in milliseconds per request
 - `request_count`: Total number of requests analyzed
 - `time_range`: Details about the analysis period including:
   - `start_time`
