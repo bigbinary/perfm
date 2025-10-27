@@ -10,7 +10,7 @@ This is because the GVL instrumentation API was [added](https://bugs.ruby-lang.o
 
 ## Installation
 
-Add perfm to your Gemfile.
+Add perfm to the Gemfile.
 
 ```ruby
 gem 'perfm'
@@ -41,9 +41,11 @@ Perfm.setup!
 
 When `monitor_gvl` is enabled, perfm adds a Rack middleware to log GVL metrics for each request. The metrics are stored in the database.
 
-We just need around `20000` datapoints(i.e requests) to get an idea of the app's workload. So the `monitor_gvl` config can be disabled after that. You can control the value via an ENV variable if you prefer.
+We just need around `20000` datapoints(i.e requests) to get an idea of the app's workload. So the `monitor_gvl` config can be disabled after that. We can control the value via an ENV variable if we prefer.
 
 ## Analysis
+
+Run the following in the Rails console to analyze the GVL metrics.
 
 ```ruby
 gvl_metrics_analyzer = Perfm::GvlMetricsAnalyzer.new(
@@ -60,10 +62,214 @@ File.write(
 )
 ```
 
+<details>
+<summary>Example output</summary>
+
+```json
+{
+  "summary": {
+    "total_io_percentage": 56.34,
+    "average_response_time_ms": 128.17,
+    "average_stall_ms": 17.77,
+    "average_gc_ms": 10.09,
+    "request_count": 84,
+    "time_range": {
+      "start_time": "2025-10-22 12:33:36 UTC",
+      "end_time": "2025-10-27 12:33:36 UTC",
+      "duration_seconds": 432000
+    }
+  },
+  "percentiles": {
+    "overall": "84 requests",
+    "p0-10": {
+      "cpu": 0.5,
+      "io": 0.1,
+      "stall": 0.0,
+      "gc": 0.0,
+      "total": 0.6,
+      "io%": "16.7%",
+      "count": 8
+    },
+    "p50-60": {
+      "cpu": 60.1,
+      "io": 31.7,
+      "stall": 2.8,
+      "gc": 3.0,
+      "total": 94.6,
+      "io%": "34.5%",
+      "count": 8
+    },
+    "p90-99": {
+      "cpu": 128.3,
+      "io": 279.7,
+      "stall": 61.2,
+      "gc": 22.3,
+      "total": 469.2,
+      "io%": "68.6%",
+      "count": 8
+    },
+    "p99-99.9": {
+      "cpu": 0.0,
+      "io": 0.0,
+      "stall": 0.0,
+      "gc": 0.0,
+      "total": 0.0,
+      "io%": "0.0%",
+      "count": 0
+    },
+    "p99.9-100": {
+      "cpu": 166.5,
+      "io": 747.4,
+      "stall": 0.4,
+      "gc": 7.9,
+      "total": 914.3,
+      "io%": "81.8%",
+      "count": 1
+    }
+  },
+  "action_breakdowns": {
+    "#": {
+      "overall": "43 requests",
+      "p0-10": {
+        "cpu": 0.5,
+        "io": 0.1,
+        "stall": 0.0,
+        "gc": 0.0,
+        "total": 0.6,
+        "io%": "16.7%",
+        "count": 4
+      },
+      "p50-60": {
+        "cpu": 0.8,
+        "io": 0.3,
+        "stall": 0.1,
+        "gc": 0.0,
+        "total": 1.2,
+        "io%": "27.3%",
+        "count": 4
+      },
+      "p90-99": {
+        "cpu": 2.0,
+        "io": 14.4,
+        "stall": 1.3,
+        "gc": 1.1,
+        "total": 17.7,
+        "io%": "87.8%",
+        "count": 4
+      },
+      "p99-99.9": {
+        "cpu": 0.0,
+        "io": 0.0,
+        "stall": 0.0,
+        "gc": 0.0,
+        "total": 0.0,
+        "io%": "0.0%",
+        "count": 0
+      },
+      "p99.9-100": {
+        "cpu": 56.6,
+        "io": 21.8,
+        "stall": 91.0,
+        "gc": 68.4,
+        "total": 169.4,
+        "io%": "27.8%",
+        "count": 1
+      }
+    },
+    "api/v1/projects#show": {
+      "overall": "4 requests",
+      "p99.9-100": {
+        "cpu": 229.1,
+        "io": 101.5,
+        "stall": 0.4,
+        "gc": 26.2,
+        "total": 331.0,
+        "io%": "30.7%",
+        "count": 1
+      }
+    },
+    "api/v1/projects/runs#index": {
+      "overall": "4 requests",
+      "p99.9-100": {
+        "cpu": 166.5,
+        "io": 747.4,
+        "stall": 0.4,
+        "gc": 7.9,
+        "total": 914.3,
+        "io%": "81.8%",
+        "count": 1
+      }
+    },
+    "api/v1/projects/runs/test_entities#index": {
+      "overall": "4 requests",
+      "p99.9-100": {
+        "cpu": 85.0,
+        "io": 192.1,
+        "stall": 0.4,
+        "gc": 15.4,
+        "total": 277.5,
+        "io%": "69.3%",
+        "count": 1
+      }
+    },
+    "api/v1/projects/runs#show": {
+      "overall": "3 requests",
+      "p99.9-100": {
+        "cpu": 104.6,
+        "io": 158.8,
+        "stall": 0.6,
+        "gc": 2.1,
+        "total": 264.0,
+        "io%": "60.3%",
+        "count": 1
+      }
+    },
+    "api/v1/projects/runs/test_entities/result_histories#index": {
+      "overall": "3 requests",
+      "p99.9-100": {
+        "cpu": 88.1,
+        "io": 312.3,
+        "stall": 79.2,
+        "gc": 14.4,
+        "total": 479.6,
+        "io%": "78.0%",
+        "count": 1
+      }
+    },
+    "api/v1/projects/runs/test_entities/outcomes#index": {
+      "overall": "3 requests",
+      "p99.9-100": {
+        "cpu": 119.7,
+        "io": 234.8,
+        "stall": 150.5,
+        "gc": 16.1,
+        "total": 505.0,
+        "io%": "66.2%",
+        "count": 1
+      }
+    },
+    "api/v1/projects/runs/test_entities#show": {
+      "overall": "3 requests",
+      "p99.9-100": {
+        "cpu": 123.4,
+        "io": 257.9,
+        "stall": 155.2,
+        "gc": 15.9,
+        "total": 536.5,
+        "io%": "67.6%",
+        "count": 1
+      }
+    }
+  }
+}
+```
+
+</details>
+
 This will print the following metrics:
 
 - `total_io_percentage`: Percentage of time spent doing I/O operations
-- `total_io_and_stall_percentage`: Percentage of time spent in I/O operations(idle time) and GVL stalls combined
+- `total_io_and_stall_percentage`: Percentage of time spent in I/O operations (idle time) and GVL stalls combined. [See this blog for more details.](https://bigbinary.com/blog/tuning-puma-max-threads-configuration-with-gvl-instrumentation#:~:text=I/O%20operations.-,Stalled,-%3A%20The%20thread%20wants)
 - `average_response_time_ms`: Average response time in milliseconds per request
 - `average_stall_ms`: Average GVL stall time in milliseconds per request
 - `average_gc_ms`: Average garbage collection time in milliseconds per request
@@ -73,7 +279,7 @@ This will print the following metrics:
   - `end_time`
   - `duration_seconds`
 
-After analysis, you can drop the table to save space. The following command generates a migration to drop the table.
+After analysis, we can drop the table to save space. The following command generates a migration to drop the table.
 
 ```bash
 bin/rails generate perfm:uninstall
@@ -83,11 +289,9 @@ bin/rails generate perfm:uninstall
 
 The following features are currently in beta and may have limited functionality or be subject to change.
 
-### Perfm queue latency monitor
+### Sidekiq queue latency monitor
 
-The queue latency monitor tracks Sidekiq queue times and raises alerts when the queue latency exceed their thresholds. To enable this feature, set `config.monitor_sidekiq_queues = true` in your Perfm configuration.
-
-ruby
+The queue latency monitor tracks Sidekiq queue times and raises alerts when the queue latency exceed their thresholds. To enable this feature, set `config.monitor_sidekiq_queues = true` in the Perfm configuration.
 
 ```ruby
 Perfm.configure do |config|
@@ -96,11 +300,11 @@ Perfm.configure do |config|
 end
 ```
 
-When enabled, Perfm will monitor your Sidekiq queues and raise a `Perfm::Errors::LatencyExceededError` when the queue latency exceeds the threshold.
+When enabled, Perfm will monitor the Sidekiq queues and raise a `Perfm::Errors::LatencyExceededError` when the queue latency exceeds the threshold.
 
 #### Queue Naming Convention
 
-Perfm expects queues that need latency monitoring to follow this naming pattern:
+Perfm expects queues that need latency monitoring to be named in the following format. If the queue is not named in this format, it will not be considered.
 
 - `within_X_seconds` (e.g., within_5_seconds)
 - `within_X_minutes` (e.g., within_2_minutes)
@@ -114,7 +318,7 @@ To enable GVL instrumentation for Sidekiq, first run the generator to add migrat
 bin/rails generate perfm:sidekiq_gvl_metrics
 ```
 
-Then enable the `monitor_sidekiq_gvl` configuration in your initializer.
+Then enable the `monitor_sidekiq_gvl` configuration.
 
 ```ruby
 Perfm.configure do |config|
@@ -127,106 +331,3 @@ When enabled, Perfm will collect GVL metrics at a job level, similar to how it c
 ```ruby
 Perfm::SidekiqGvlMetric.calculate_queue_io_percentage("within_5_seconds")
 ```
-
-### Heap analyzer
-
-### Generate and Store Heap Dumps via ActiveStorage
-
-Perfm has a heap dump generator which can be used to generate heap dumps from running Puma worker processes and storing them via ActiveStorage. This can be useful for debugging memory leaks. We can generate three dumps separate by a time period of lets say 15 minutes and analyze it via heapy or sheap.
-
-_Note: The process of heap dump generation can increase the memory usage._
-
-#### Puma configuration changes:
-
-Add the following to your `config/puma.rb`:
-
-```ruby
-on_worker_boot do
-  Perfm::PidStore.instance.add_worker_pid(Process.pid)
-end
-
-on_worker_shutdown do
-  Perfm::PidStore.instance.clear
-end
-```
-
-We need to keep track of pid of each worker process so that we inject code to generate heap dump in each worker process using [rbtrace](https://github.com/tmm1/rbtrace)
-
-#### Route setup
-
-```ruby
-# config/routes.rb
-Rails.application.routes.draw do
-  namespace :perfm do
-    namespace :admin do
-      resources :heap_dumps, only: :create
-    end
-  end
-end
-```
-
-#### Controller to generate heap dumps
-
-As we need to invoke rbtrace from the same process, we'll use a controller itself to invoke the `HeapDumper`.
-
-```ruby
-class Perfm::Admin::HeapDumpsController < ActionController::Base
-  skip_forgery_protection
-  before_action :authenticate_admin
-
-  def create
-    blob = Perfm::HeapDumper.generate
-
-    render json: {
-      status: "success",
-      message: "Heap dump generated successfully",
-      blob_id: blob.id,
-      filename: blob.filename.to_s
-    }
-  rescue Perfm::HeapDumper::Error => e
-    render json: { status: "error", message: e.message }, status: :unprocessable_entity
-  end
-
-  private
-
-  def authenticate_admin
-    return if Rails.env.development?
-
-    unless valid_token?(request.headers["X-Perfm-Token"])
-      head :unauthorized
-    end
-  end
-
-  def valid_token?(token)
-    return false if token.blank? || Perfm.configuration.admin_token.blank?
-
-    ActiveSupport::SecurityUtils.secure_compare(
-      token,
-      Perfm.configuration.admin_token
-    )
-  end
-end
-```
-
-#### Usage
-
-```bash
-curl -X POST https://your-app.com/perfm/admin/heap_dumps -H "X-Perfm-Token: your-secure-token"
-```
-
-The generated heap dump will be stored via ActiveStorage and the response includes the blob ID and filename for later reference.
-
-#### Configuration
-
-Configure the admin token in your Perfm initializer:
-
-```ruby
-# config/initializers/perfm.rb
-Perfm.configure do |config|
-  config.admin_token = ENV["PERFM_ADMIN_TOKEN"]
-end
-```
-
-The generated heap dumps can be downloaded and analyzed using [heapy](https://github.com/zombocom/heapy)
-
-We're planning to add a heap analyzer within perfm itself to make the process seamless.
